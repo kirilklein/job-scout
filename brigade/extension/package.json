@@ -1,0 +1,6 @@
+{
+  "name": "job-scout-brigade-extension",
+  "private": true,
+  "type": "module",
+  "dependencies": { "typebox": "^1.0.0" }
+}

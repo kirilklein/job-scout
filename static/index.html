@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f6f7fb" />
+    <title>Job Scout — Your next chapter</title>
+    <link rel="stylesheet" href="/static/style.css" />
+    <script type="module" src="/static/app.js"></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <a class="brand" href="#dashboard"
+          ><span class="brand-icon">↗</span> job scout<span class="beta"
+            >early access</span
+          ></a
+        >
+        <p class="sidebar-label">YOUR WORKSPACE</p>
+        <nav aria-label="Main navigation">
+          <button class="nav-item active" data-view="dashboard">
+            <span>◈</span> Discover
+            <span id="nav-count" class="nav-count">0</span>
+          </button>
+          <button class="nav-item" data-view="saved">
+            <span>♡</span> Saved jobs
+          </button>
+          <button class="nav-item" data-view="profile">
+            <span>◎</span> Your profile
+          </button>
+          <button class="nav-item" data-view="sources">
+            <span>⌁</span> Search sources
+          </button>
+        </nav>
+        <div class="sidebar-bottom">
+          <div class="daily-box">
+            <span class="status-dot"></span
+            ><strong>Your search, on repeat.</strong>
+            <p>A fresh look at your next move, every day.</p>
+            <label class="toggle-label"
+              ><input id="daily-toggle" type="checkbox" role="switch" /> Daily
+              updates</label
+            ><small id="schedule-copy"
+              >Updates run while Job Scout is running.</small
+            >
+          </div>
+          <button id="mode-toggle" class="text-button">
+            Explore the demo ↗
+          </button>
+          <div class="user-chip">
+            <span class="avatar" id="avatar">Y</span>
+            <div>
+              <strong id="profile-name">Your workspace</strong
+              ><small>Personal job search</small>
+            </div>
+          </div>
+        </div>
+      </aside>
+      <main>
+        <header class="topbar">
+          <span id="breadcrumb">Workspace <span>/</span> Discover</span>
+          <div class="topbar-actions">
+            <button id="header-mode" class="text-button">Explore demo</button
+            ><span class="private-label">◌ Local workspace</span>
+          </div>
+        </header>
+        <div id="demo-banner" class="banner" hidden>
+          DEMO WORKSPACE
+          <span
+            >These companies and jobs are fictional. Try saving a role or
+            changing the profile.</span
+          ><button id="exit-demo">Go to my workspace →</button>
+        </div>
+        <div id="notice" class="notice" role="status" hidden></div>
+        <section id="dashboard-view" class="view">
+          <div class="page-heading">
+            <div>
+              <p class="eyebrow">A LITTLE CLOSER TO WHAT’S NEXT</p>
+              <h1 id="dashboard-title">Your next chapter.</h1>
+              <p id="dashboard-subtitle">
+                Good opportunities. A clearer picture of where you fit.
+              </p>
+            </div>
+            <button id="refresh" class="button primary">
+              <span>↻</span> Refresh search
+            </button>
+          </div>
+          <div class="stats-grid">
+            <article>
+              <span class="stat-icon">↗</span>
+              <div>
+                <strong id="stat-new">0</strong>
+                <p>New in the last 24 hours</p>
+              </div>
+            </article>
+            <article>
+              <span class="stat-icon lavender">✧</span>
+              <div>
+                <strong id="stat-matches">0</strong>
+                <p>Roles matching your filters</p>
+              </div>
+            </article>
+            <article>
+              <span class="stat-icon peach">♡</span>
+              <div>
+                <strong id="stat-saved">0</strong>
+                <p>Saved for a closer look</p>
+              </div>
+            </article>
+          </div>
+          <div class="search-summary">
+            <div>
+              <span class="spark">✦</span>
+              <div>
+                <strong id="search-summary-title"
+                  >A search that starts with you</strong
+                >
+                <p id="search-summary-text">
+                  Tell us what you want to do next. We’ll look for the overlap.
+                </p>
+              </div>
+            </div>
+            <button class="text-button" data-view="profile">
+              Edit preferences ↗
+            </button>
+          </div>
+          <div class="results-heading">
+            <h2 id="results-title">
+              Your opportunities <span id="result-count">0</span>
+            </h2>
+            <span id="last-checked">Ready when you are</span>
+          </div>
+          <div class="toolbar">
+            <div class="tabs" role="group" aria-label="Job status">
+              <button class="tab active" data-filter="new">Discover</button
+              ><button class="tab" data-filter="saved">Saved</button
+              ><button class="tab" data-filter="dismissed">Dismissed</button>
+            </div>
+            <div class="filter-tools">
+              <label class="visually-hidden" for="job-search">Search jobs</label
+              ><input
+                id="job-search"
+                type="search"
+                placeholder="Search roles or companies…"
+              /><label class="visually-hidden" for="eligibility"
+                >Match filter</label
+              ><select id="eligibility">
+                <option value="eligible">Matching filters</option>
+                <option value="all">All roles</option>
+                <option value="closed">Closed roles</option>
+              </select>
+            </div>
+          </div>
+          <p class="matching-note">
+            Ranked by role, skills, location, and interests. Match signals are
+            not hiring probabilities.
+          </p>
+          <div id="jobs" class="job-grid"></div>
+          <div id="empty-state" class="empty-state" hidden>
+            <span>✧</span>
+            <h2>Make room for your next move.</h2>
+            <p>
+              Start with a few preferences, connect employer job boards, and let
+              your shortlist take shape.
+            </p>
+            <div>
+              <button class="button primary" data-view="profile">
+                Build my profile →</button
+              ><button id="try-demo" class="button secondary">
+                Try the demo
+              </button>
+            </div>
+          </div>
+          <section class="activity">
+            <div>
+              <h2>Search activity</h2>
+              <p>Know what was checked, and what needs another look.</p>
+            </div>
+            <div id="activity-list"></div>
+          </section>
+        </section>
+        <section id="profile-view" class="view" hidden>
+          <div class="page-heading">
+            <div>
+              <p class="eyebrow">THE STARTING POINT</p>
+              <h1>What’s your next move?</h1>
+              <p>
+                Your experience is the starting point. Your preferences set the
+                direction.
+              </p>
+            </div>
+          </div>
+          <div class="profile-layout">
+            <div>
+              <div class="upload-panel">
+                <span class="upload-icon">↥</span>
+                <h2>Start with your resume</h2>
+                <p>
+                  We’ll suggest roles and skills for you to review. Your file
+                  stays local and is discarded after reading.
+                </p>
+                <label class="button secondary upload-label"
+                  >Choose a resume<input
+                    id="resume-file"
+                    type="file"
+                    accept=".pdf,.docx,.txt,.md" /></label
+                ><small
+                  >PDF, DOCX, or text · Up to 5 MB · Text-based documents</small
+                >
+                <p id="upload-status" role="status"></p>
+              </div>
+              <aside class="tip-card">
+                <span>✧</span>
+                <h3>A profile you control</h3>
+                <p>
+                  Suggestions never replace your preferences automatically. Add
+                  the work you want to do, even if it isn’t your current job
+                  title.
+                </p>
+                <p>
+                  For remote roles, always check the countries an employer can
+                  hire in.
+                </p>
+              </aside>
+            </div>
+            <form id="profile-form" class="panel">
+              <div class="form-heading">
+                <h2>A few things about you</h2>
+                <p>Separate multiple entries with commas.</p>
+              </div>
+              <label
+                >Your name<input
+                  name="name"
+                  placeholder="How should we call you?"
+                  maxlength="100" /></label
+              ><label
+                >Which roles are you looking for?<input
+                  name="roles"
+                  placeholder="Machine learning engineer, Data scientist"
+                  required
+                /><small
+                  >We also recognize related titles in common technical role
+                  families.</small
+                ></label
+              ><label
+                >Skills you want to use<input
+                  name="skills"
+                  placeholder="Python, SQL, causal inference" /></label
+              ><label
+                >Where would you like to work?<input
+                  name="locations"
+                  placeholder="Copenhagen, Denmark, Europe"
+                /><small
+                  >Leave blank to consider any location. Remote eligibility
+                  still needs checking.</small
+                ></label
+              >
+              <div class="form-row">
+                <label
+                  >Work arrangement<select name="remote">
+                    <option value="any">Open to any arrangement</option>
+                    <option value="remote">Remote only</option>
+                    <option value="onsite">Office-based</option>
+                  </select></label
+                ><label
+                  >Experience level<select name="seniority">
+                    <option value="any">Open to any level</option>
+                    <option value="junior">Junior / early career</option>
+                    <option value="mid">Mid-level</option>
+                    <option value="senior">Senior</option>
+                    <option value="lead">Lead / staff</option>
+                  </select></label
+                >
+              </div>
+              <label
+                >What interests you?<input
+                  name="interests"
+                  placeholder="Healthcare, climate, research" /></label
+              ><label
+                >Terms to exclude<input
+                  name="excluded"
+                  placeholder="Unpaid, commission-only"
+                /><small
+                  >Any listing containing one of these terms is filtered
+                  out.</small
+                ></label
+              ><label
+                >Anything else that matters?<textarea
+                  name="notes"
+                  rows="3"
+                  maxlength="3000"
+                  placeholder="Salary expectations, work authorization, industries to explore…"
+                ></textarea
+                ><small
+                  >Context for Brigade reviews; these notes are not automatic
+                  filters.</small
+                ></label
+              >
+              <div class="form-footer">
+                <span id="profile-save-status" role="status"></span
+                ><button class="button primary" type="submit">
+                  Save my profile →
+                </button>
+              </div>
+            </form>
+          </div>
+        </section>
+        <section id="sources-view" class="view" hidden>
+          <div class="page-heading">
+            <div>
+              <p class="eyebrow">GO STRAIGHT TO THE SOURCE</p>
+              <h1>Where we look.</h1>
+              <p>
+                Fresh listings from employers’ own job boards. You choose the
+                coverage.
+              </p>
+            </div>
+          </div>
+          <div class="source-layout">
+            <div>
+              <div class="panel">
+                <div class="form-heading">
+                  <h2>Your employer boards</h2>
+                  <p>
+                    Each board is checked on refresh. Failed checks leave
+                    existing jobs intact.
+                  </p>
+                </div>
+                <div id="source-list"></div>
+                <button id="starter-sources" class="button secondary">
+                  Add 3 starter employers
+                </button>
+              </div>
+              <div class="panel discovery-panel">
+                <h2>Keep your search moving</h2>
+                <p>
+                  Refresh employer listings every 24 hours while this app is
+                  running.
+                </p>
+                <label class="toggle-label"
+                  ><input id="sources-daily" type="checkbox" role="switch" />
+                  Enable daily updates</label
+                >
+                <p id="sources-schedule" class="muted"></p>
+              </div>
+              <div class="panel discovery-panel">
+                <span class="spark">✦</span>
+                <h2>Expand your search</h2>
+                <p>
+                  Brigade can discover relevant employers using your profile and
+                  add their boards here. With a Tavily key configured, you can
+                  also discover boards directly.
+                </p>
+                <button id="discover-sources" class="button secondary">
+                  Discover employers
+                </button>
+                <p id="discovery-status" class="muted"></p>
+              </div>
+            </div>
+            <form id="source-form" class="panel">
+              <h2>Add an employer</h2>
+              <label
+                >Company name<input
+                  name="company"
+                  placeholder="e.g. OpenAI"
+                  required
+                  maxlength="100" /></label
+              ><label
+                >Job board platform<select name="provider">
+                  <option value="ashby">Ashby</option>
+                  <option value="greenhouse">Greenhouse</option>
+                  <option value="lever">Lever</option>
+                </select></label
+              ><label
+                >Board identifier<input
+                  name="board"
+                  placeholder="e.g. openai"
+                  required
+                  pattern="[A-Za-z0-9_-]+"
+                  maxlength="100"
+                /><small
+                  >The first path segment in the employer’s board URL, e.g.
+                  jobs.ashbyhq.com/<strong>openai</strong>.</small
+                ></label
+              ><button class="button primary" type="submit">
+                Add source →
+              </button>
+              <p class="muted">
+                This version reads public listings from these three platforms.
+                It does not submit applications.
+              </p>
+            </form>
+          </div>
+        </section>
+        <footer>
+          Built for a more intentional job search.<span>Job Scout · v0.1</span>
+        </footer>
+      </main>
+    </div>
+    <dialog id="job-dialog">
+      <button
+        id="close-dialog"
+        class="close-button"
+        aria-label="Close job details"
+      >
+        ×
+      </button>
+      <div id="job-detail"></div>
+    </dialog>
+    <dialog id="auth-dialog">
+      <form id="auth-form">
+        <h2>Unlock your workspace</h2>
+        <p>Enter the access token configured for this local instance.</p>
+        <label
+          >Access token<input
+            id="access-token"
+            type="password"
+            required
+            autocomplete="off" /></label
+        ><button class="button primary">Unlock</button>
+      </form>
+    </dialog>
+  </body>
+</html>

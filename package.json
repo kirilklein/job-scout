@@ -1,0 +1,15 @@
+{
+  "name": "job-scout-ui-checks",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:browser": "playwright test",
+    "test:bridge": "node --test tests/brigade.test.mjs",
+    "format": "prettier --write static brigade/extension/index.mjs tests/**/*.mjs tests/*.mjs playwright.config.mjs package.json",
+    "format:check": "prettier --check static brigade/extension/index.mjs tests/**/*.mjs tests/*.mjs playwright.config.mjs package.json"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.0",
+    "prettier": "^3.6.0"
+  }
+}

@@ -8,6 +8,8 @@ test("registers owner tools without application-sending capabilities", () => {
   assert.deepEqual(
     registered.map((t) => t.name),
     [
+      "scout_interview_context",
+      "scout_interview_submit",
       "scout_profile",
       "scout_add_source",
       "scout_refresh",
@@ -18,6 +20,55 @@ test("registers owner tools without application-sending capabilities", () => {
   assert.ok(
     registered.every((t) => t.ownerOnly && t.parameters.type === "object"),
   );
+});
+
+test("interview tools use only the selected task and submit a draft", async (t) => {
+  const taskId = "a".repeat(32);
+  t.mock.method(globalThis, "fetch", async (url, options) => {
+    assert.equal(new URL(url).pathname, `/api/interview/tasks/${taskId}`);
+    const body = JSON.parse(options.body);
+    assert.equal(body.revision, 4);
+    assert.equal(body.task_id, undefined);
+    return Response.json({ ok: true });
+  });
+  await createTools()
+    .find((tool) => tool.name === "scout_interview_submit")
+    .execute("1", {
+      task_id: taskId,
+      revision: 4,
+      question: "What did you personally contribute?",
+      title: "Your role",
+      category: "experience",
+      suggestions: [],
+    });
+});
+
+test("job search receives confirmed background, not interview drafts", async (t) => {
+  const background = [
+    {
+      category: "project",
+      title: "Community data project",
+      detail: "Analyzed survey data",
+    },
+  ];
+  t.mock.method(globalThis, "fetch", async () =>
+    Response.json({
+      profile: { background },
+      profile_version: "p",
+      sources: [],
+      jobs: [],
+      interview: { messages: ["private draft"] },
+    }),
+  );
+  const result = JSON.parse(
+    (
+      await createTools()
+        .find((tool) => tool.name === "scout_profile")
+        .execute("1", {})
+    ).content[0].text,
+  );
+  assert.deepEqual(result.profile.background, background);
+  assert.equal(result.interview, undefined);
 });
 
 test("limits candidates, excludes dismissed/closed jobs and preserves versions", async (t) => {

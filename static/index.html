@@ -183,21 +183,113 @@
           <div class="page-heading">
             <div>
               <p class="eyebrow">THE STARTING POINT</p>
-              <h1>What’s your next move?</h1>
+              <h1>More than a job title.</h1>
               <p>
-                Your experience is the starting point. Your preferences set the
-                direction.
+                Build a picture of what you’ve done, what you’re good at, and
+                what you want next.
               </p>
             </div>
           </div>
+          <section class="story-builder" aria-labelledby="story-heading">
+            <div class="story-intro">
+              <div>
+                <p class="eyebrow">YOUR EXPERIENCE, IN YOUR WORDS</p>
+                <h2 id="story-heading">Let’s get to know your work.</h2>
+                <p>
+                  A CV is optional. Research, personal projects, volunteering,
+                  and life outside your job title all belong here.
+                </p>
+              </div>
+              <span id="story-progress" class="tag">Start anywhere</span>
+            </div>
+            <div class="story-grid">
+              <div class="panel conversation-panel">
+                <details id="conversation-history">
+                  <summary>
+                    Your conversation <span id="message-count"></span>
+                  </summary>
+                  <div id="story-messages"></div>
+                </details>
+                <div class="interview-question">
+                  <span id="question-source" class="eyebrow"
+                    >GUIDED QUESTION</span
+                  >
+                  <h3 id="story-question">
+                    Tell me about a project you’re proud of.
+                  </h3>
+                </div>
+                <form id="story-answer-form">
+                  <label for="story-answer">Your answer</label
+                  ><textarea
+                    id="story-answer"
+                    rows="5"
+                    minlength="10"
+                    maxlength="3000"
+                    required
+                    placeholder="What was the situation? What did you personally contribute? What happened?"
+                  ></textarea>
+                  <div class="story-answer-actions">
+                    <span>Specific examples beat polished CV language.</span
+                    ><button class="button primary" type="submit">
+                      Continue conversation →
+                    </button>
+                  </div>
+                </form>
+                <div class="model-assist">
+                  <label class="toggle-label"
+                    ><input id="share-interview" type="checkbox" /> Share this
+                    conversation, imported CV text, and saved profile with my
+                    configured Brigade model for this request.</label
+                  ><button
+                    id="interview-assist"
+                    class="button secondary"
+                    disabled
+                  >
+                    Ask Brigade for a deeper follow-up
+                  </button>
+                  <p id="interview-status" role="status" aria-live="polite"></p>
+                  <details id="interview-setup">
+                    <summary>Connect a model</summary>
+                    <p>
+                      Run <code>./brigade.sh setup</code> to install or update
+                      the extension, then <code>./brigade.sh onboard</code> to
+                      connect your provider. Reload this page afterwards. Guided
+                      questions work without a model.
+                    </p>
+                  </details>
+                </div>
+                <button id="clear-conversation" class="text-button">
+                  Clear conversation and unconfirmed suggestions
+                </button>
+              </div>
+              <div class="panel suggestions-panel">
+                <h2>
+                  Details to review
+                  <span id="suggestion-count" class="tag">0</span>
+                </h2>
+                <p class="muted">
+                  These are drafts. Edit what matters, add it to your profile
+                  below, then save. Nothing here is used for job assessments
+                  yet.
+                </p>
+                <div id="story-suggestions">
+                  <p class="muted">
+                    Your answers will appear here. With a model connected,
+                    Brigade can also extract details from your CV.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
           <div class="profile-layout">
             <div>
               <div class="upload-panel">
                 <span class="upload-icon">↥</span>
-                <h2>Start with your resume</h2>
+                <h2>Have a CV? Start there.</h2>
                 <p>
-                  We’ll suggest roles and skills for you to review. Your file
-                  stays local and is discarded after reading.
+                  We’ll suggest roles and skills for you to review. Optionally
+                  add its text to your conversation so Brigade can explore the
+                  experience behind it.
                 </p>
                 <label class="button secondary upload-label"
                   >Choose a resume<input
@@ -208,6 +300,15 @@
                   >PDF, DOCX, or text · Up to 5 MB · Text-based documents</small
                 >
                 <p id="upload-status" role="status"></p>
+                <label class="toggle-label"
+                  ><input id="remember-resume" type="checkbox" /> Keep the
+                  extracted CV text in my local conversation.</label
+                ><small
+                  >The uploaded file is discarded. Retained text stays local
+                  until you explicitly ask Brigade to use it. Clearing this
+                  conversation does not delete Brigade or provider
+                  history.</small
+                >
               </div>
               <aside class="tip-card">
                 <span>✧</span>
@@ -225,9 +326,28 @@
             </div>
             <form id="profile-form" class="panel">
               <div class="form-heading">
-                <h2>A few things about you</h2>
+                <h2>Your search preferences</h2>
                 <p>Separate multiple entries with commas.</p>
               </div>
+              <section
+                class="background-section"
+                aria-labelledby="background-heading"
+              >
+                <h2 id="background-heading">Your experience profile</h2>
+                <p class="muted">
+                  Confirmed details give Brigade context beyond keywords. Edit
+                  or remove them here. Changes take effect when you save this
+                  form.
+                </p>
+                <div id="background-items"></div>
+                <button
+                  id="add-background"
+                  class="button secondary"
+                  type="button"
+                >
+                  Add an experience detail
+                </button>
+              </section>
               <label
                 >Your name<input
                   name="name"
@@ -237,10 +357,9 @@
                 >Which roles are you looking for?<input
                   name="roles"
                   placeholder="Machine learning engineer, Data scientist"
-                  required
                 /><small
-                  >We also recognize related titles in common technical role
-                  families.</small
+                  >Optional while building your experience profile. Related
+                  technical role titles are recognized.</small
                 ></label
               ><label
                 >Skills you want to use<input

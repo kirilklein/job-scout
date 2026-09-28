@@ -1,3 +1,5 @@
+import { setupExperience } from "/static/interview.js";
+
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
 const esc = (value) =>
@@ -14,6 +16,7 @@ let state,
   filter = "new",
   busy = false;
 let token = sessionStorage.getItem("scout-token") || "";
+const experience = setupExperience({ api, action, notify, esc });
 
 async function api(path, { method = "GET", body, file } = {}) {
   const headers = { "X-Scout-Client": "job-scout" };
@@ -87,10 +90,12 @@ function setView(next) {
   $("#breadcrumb").textContent =
     `Workspace / ${{ dashboard: "Discover", saved: "Saved jobs", profile: "Your profile", sources: "Search sources" }[next]}`;
   if (state) renderJobs();
+  if (next === "profile") action(() => experience.loadInterview());
   window.scrollTo({ top: 0, behavior: "instant" });
 }
 
 function fillProfile(profile) {
+  experience.setProfile(profile);
   const form = $("#profile-form");
   Object.entries(profile).forEach(([key, value]) => {
     if (form.elements[key])
@@ -161,7 +166,10 @@ async function load({ profile = false } = {}) {
   $("#discover-sources").disabled =
     !state.discovery_available || mode === "demo";
   $("#starter-sources").disabled = mode === "demo";
-  if (profile) fillProfile(state.profile);
+  if (profile) {
+    fillProfile(state.profile);
+    await experience.loadInterview();
+  }
   renderJobs();
   renderSources();
   renderActivity();
@@ -284,6 +292,11 @@ async function refresh(discover = false) {
 }
 
 async function switchMode(next) {
+  if (experience.isBusy())
+    throw new Error(
+      "Wait for the current interview request before switching workspaces.",
+    );
+  experience.reset();
   mode = next;
   localStorage.setItem("scout-mode", mode);
   $("#notice").hidden = true;
@@ -378,6 +391,7 @@ $("#profile-form").addEventListener("submit", (event) => {
   event.preventDefault();
   action(async () => {
     const fields = Object.fromEntries(new FormData(event.target));
+    fields.background = experience.profileBackground();
     ["roles", "skills", "locations", "interests", "excluded"].forEach((key) => {
       fields[key] = fields[key]
         .split(",")
@@ -386,6 +400,7 @@ $("#profile-form").addEventListener("submit", (event) => {
     });
     await api("profile", { method: "PUT", body: fields });
     await load();
+    experience.setProfile(state.profile);
     $("#profile-save-status").textContent = "Profile saved";
     notify(
       "Profile saved. Your existing jobs have been ranked again. Add employer boards in Search sources to find more.",
@@ -395,12 +410,17 @@ $("#profile-form").addEventListener("submit", (event) => {
 $("#resume-file").addEventListener("change", (event) =>
   action(async () => {
     const file = event.target.files[0];
-    if (!file) return;
+    if (!file || experience.isBusy()) return;
+    experience.setBusy(true);
     $("#upload-status").textContent = "Reading your resume…";
     try {
       const form = new FormData();
       form.append("file", file);
-      const result = await api("resume", { method: "POST", file: form });
+      const remember = $("#remember-resume").checked;
+      const result = await api(
+        `resume?remember=${remember}&revision=${experience.revision()}`,
+        { method: "POST", file: form },
+      );
       for (const key of ["roles", "skills"]) {
         const input = $("#profile-form").elements[key];
         const existing = input.value
@@ -412,11 +432,13 @@ $("#resume-file").addEventListener("change", (event) =>
         );
       }
       $("#upload-status").textContent = result.message;
+      if (remember) await experience.loadInterview();
     } catch (error) {
       $("#upload-status").textContent = error.message;
       throw error;
     } finally {
       event.target.value = "";
+      experience.setBusy(false);
     }
   }),
 );

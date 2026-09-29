@@ -17,6 +17,8 @@ from pypdf.errors import PdfReadError
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from .demo import seed_demo
+from .interview import InterviewAssistant, add_resume
+from .interview_routes import interview_router
 from .matching import extract_profile
 from .models import Decision, Profile, Review, Source
 from .service import SearchService
@@ -38,6 +40,7 @@ def create_app(data_dir=None, schedule=True):
     token = os.environ.get("SCOUT_TOKEN", "")
     discovery_key = os.environ.get("TAVILY_API_KEY", "")
     service = SearchService(live, discovery_key)
+    interviewer = InterviewAssistant(ROOT)
 
     @asynccontextmanager
     async def lifespan(app):
@@ -53,6 +56,8 @@ def create_app(data_dir=None, schedule=True):
         TrustedHostMiddleware, allowed_hosts=["127.0.0.1", "localhost", "testserver"]
     )
     app.state.live, app.state.demo, app.state.service = live, demo, service
+    app.state.interviewer = interviewer
+    app.include_router(interview_router(live, demo, interviewer))
 
     @app.middleware("http")
     async def local_only(request: Request, call_next):
@@ -111,7 +116,12 @@ def create_app(data_dir=None, schedule=True):
         return {"ok": True}
 
     @app.post("/api/resume")
-    async def resume(file: UploadFile = File(...)):
+    async def resume(
+        file: UploadFile = File(...),
+        remember: bool = False,
+        revision: int | None = None,
+        mode: Mode = "live",
+    ):
         content = await file.read(5 * 1024 * 1024 + 1)
         await file.close()
         if len(content) > 5 * 1024 * 1024:
@@ -142,9 +152,21 @@ def create_app(data_dir=None, schedule=True):
             raise HTTPException(
                 422, "No usable text found. Scanned PDFs need OCR; paste or upload a text version."
             )
+        if remember:
+            if revision is None:
+                raise HTTPException(422, "A conversation version is required")
+            try:
+                add_resume(store(mode), text, revision)
+            except ValueError as exc:
+                raise HTTPException(409, str(exc)) from exc
         return {
             "profile": extract_profile(text[:100000]).model_dump(),
             "message": (
+                "CV text added to your local conversation. Review the suggested roles and skills. "
+                "Nothing was sent to a model."
+            )
+            if remember
+            else (
                 "Review these suggested roles and skills before saving. "
                 "The uploaded file was not stored or sent to a model."
             ),

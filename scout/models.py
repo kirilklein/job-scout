@@ -1,7 +1,19 @@
 import re
 from typing import Literal
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+Category = Literal["experience", "project", "achievement", "skill", "education", "preference"]
+
+
+class BackgroundItem(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    id: str = Field(min_length=1, max_length=64)
+    category: Category
+    title: str = Field(min_length=1, max_length=120)
+    detail: str = Field(min_length=1, max_length=3000)
+    quote: str = Field(default="", max_length=6000)
 
 
 class Profile(BaseModel):
@@ -14,6 +26,7 @@ class Profile(BaseModel):
     interests: list[str] = Field(default_factory=list, max_length=20)
     excluded: list[str] = Field(default_factory=list, max_length=20)
     notes: str = Field(default="", max_length=3000)
+    background: list[BackgroundItem] = Field(default_factory=list, max_length=60)
 
     @field_validator("roles", "skills", "locations", "interests", "excluded")
     @classmethod

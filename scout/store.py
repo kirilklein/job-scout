@@ -60,6 +60,19 @@ class Store:
         with self.connect() as db:
             db.execute("INSERT OR REPLACE INTO settings VALUES (?, ?)", (key, json.dumps(value)))
 
+    def save_interview(self, interview, expected_revision):
+        with self.connect() as db:
+            db.execute("BEGIN IMMEDIATE")
+            row = db.execute("SELECT value FROM settings WHERE key='interview'").fetchone()
+            revision = json.loads(row[0])["revision"] if row else 0
+            if revision != expected_revision:
+                raise ValueError("This conversation changed. Reload it and try again.")
+            interview["revision"] = revision + 1
+            db.execute(
+                "INSERT OR REPLACE INTO settings VALUES ('interview', ?)", (json.dumps(interview),)
+            )
+        return interview
+
     def profile(self):
         return Profile.model_validate(self.setting("profile", {}))
 

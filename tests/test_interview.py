@@ -11,6 +11,7 @@ def client(tmp_path):
     with TestClient(
         create_app(tmp_path, schedule=False), headers={"X-Scout-Client": "job-scout"}
     ) as client:
+        client.app.state.interviewer.root = tmp_path
         yield client
 
 
